@@ -8,6 +8,23 @@
 <body>
 
 <h1>Управление продуктами</h1>
+<h2>Создать продукт</h2>
+
+<form id="createForm">
+  <input type="text" id="title" placeholder="Название продукта">
+  <span class="error" id="titleError"></span>
+
+  <input type="number" id="price" placeholder="Цена">
+  <span class="error" id="priceError"></span>
+
+  <input type="text" id="status" placeholder="Статус (active / inactive)">
+  <span class="error" id="statusError"></span>
+
+  <input type="text" id="image" placeholder="URL изображения">
+  <span class="error" id="imageError"></span>
+
+  <button type="submit">Создать</button>
+</form>
 
 
 <div class="search">

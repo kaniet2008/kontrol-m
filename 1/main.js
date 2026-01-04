@@ -92,3 +92,77 @@ searchBtn.addEventListener('click', searchProductById);
 
 
 fetchProducts();
+
+
+const createForm = document.getElementById('createForm');
+
+createForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+
+  const title = document.getElementById('title');
+  const price = document.getElementById('price');
+  const status = document.getElementById('status');
+  const image = document.getElementById('image');
+
+
+  clearCreateErrors();
+  let isValid = true;
+
+  if (title.value.trim().length < 3) {
+    showCreateError('titleError', 'Минимум 3 символа');
+    isValid = false;
+  }
+
+  if (price.value === '' || Number(price.value) <= 0) {
+    showCreateError('priceError', 'Цена должна быть больше 0');
+    isValid = false;
+  }
+
+  if (!status.value.trim()) {
+    showCreateError('statusError', 'Статус обязателен');
+    isValid = false;
+  }
+
+  if (!image.value.trim()) {
+    showCreateError('imageError', 'Введите URL изображения');
+    isValid = false;
+  }
+
+  if (!isValid) return;
+
+  const newProduct = {
+    title: title.value.trim(),
+    price: Number(price.value),
+    status: status.value.trim(),
+    image: image.value.trim()
+  };
+
+  try {
+    const response = await fetch(API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(newProduct)
+    });
+
+    if (!response.ok) {
+      throw new Error('Ошибка при создании продукта');
+    }
+
+    message.textContent = 'Продукт создан';
+    createForm.reset();
+    fetchProducts();
+  } catch (error) {
+    message.textContent = error.message;
+  }
+});
+
+function showCreateError(id, text) {
+  document.getElementById(id).textContent = text;
+}
+
+function clearCreateErrors() {
+  document.querySelectorAll('.error').forEach(e => e.textContent = '');
+}

@@ -31,3 +31,20 @@ button {
   margin-top: 10px;
   font-weight: bold;
 }
+
+form {
+  margin-bottom: 20px;
+}
+
+form input {
+  display: block;
+  margin: 6px 0;
+  padding: 6px;
+  width: 300px;
+}
+
+.error {
+  color: red;
+  font-size: 12px;
+  height: 14px;
+}

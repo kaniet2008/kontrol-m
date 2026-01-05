@@ -1,18 +1,22 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <title>Products Manager</title>
-  <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<title>Products Manager</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
 
 <h1>Управление продуктами</h1>
- <h2>Создать продукт</h2>
+<h2>Создать продукт</h2>
 
 <form id="createForm">
   <input type="text" id="title" placeholder="Название продукта">
   <span class="error" id="titleError"></span>
+
+  <input type="text" id="description" placeholder="Описание продукта">
+  <span class="error" id="descriptionError"></span>
 
   <input type="number" id="price" placeholder="Цена">
   <span class="error" id="priceError"></span>
@@ -26,24 +30,30 @@
   <button type="submit">Создать</button>
 </form>
 
+<hr>
 
 <div class="search">
   <input type="text" id="searchId" placeholder="Введите ID продукта">
   <button id="searchBtn">Найти</button>
 </div>
 
-<p id="message"></p>
+<button id="toggleFavorites">
+   Показать избранное
+</button>
 
+<p id="message"></p>
 
 <table>
   <thead>
     <tr>
       <th>ID</th>
       <th>Название</th>
+      <th>Описание</th>
       <th>Цена</th>
       <th>Статус</th>
       <th>Изображение</th>
       <th>Действия</th>
+      <th>Избранное</th>
     </tr>
   </thead>
   <tbody id="productsTable"></tbody>

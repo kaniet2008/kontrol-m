@@ -1,64 +1,99 @@
 const API_URL = 'http://localhost:8000/products';
-
 const tableBody = document.getElementById('productsTable');
 const message = document.getElementById('message');
 const searchBtn = document.getElementById('searchBtn');
 const searchInput = document.getElementById('searchId');
+const toggleFavoritesBtn = document.getElementById('toggleFavorites');
+const img = new Image();
+img.src = './heart-58.png';
+let allProducts = [];
+let showFavoritesOnly = false;
 
+function getFavorites() {
+  return JSON.parse(localStorage.getItem('favoriteIds')) || [];
+}
+
+function toggleFavorite(id) {
+  let favs = getFavorites();
+
+  if (favs.includes(id)) {
+    favs = favs.filter(f => f !== id);
+  } else {
+    favs.push(id);
+  }
+
+  localStorage.setItem('favoriteIds', JSON.stringify(favs));
+  renderProducts(allProducts);
+}
 
 async function fetchProducts() {
   try {
-    message.textContent = 'Загрузка продуктов...';
+    message.textContent = 'Loading...';
 
     const response = await fetch(API_URL);
-    if (!response.ok) {
-      throw new Error('Ошибка загрузки продуктов');
+    if (!response.ok) throw new Error('Ошибка загрузки продуктов');
+
+    allProducts = await response.json();
+
+    if (allProducts.length === 0) {
+      message.textContent = 'Пока нет товаров';
+      tableBody.innerHTML = '';
+      return;
     }
 
-    const products = await response.json();
-    renderProducts(products);
-    message.textContent = 'Продукты загружены';
+    renderProducts(allProducts);
+    message.textContent = '';
   } catch (error) {
     message.textContent = error.message;
   }
 }
 
-
 function renderProducts(products) {
   tableBody.innerHTML = '';
 
-  products.forEach(product => {
-    const row = document.createElement('tr');
+  const favorites = getFavorites();
+  const list = showFavoritesOnly
+    ? products.filter(p => favorites.includes(p.id))
+    : products;
 
+  if (list.length === 0) {
+    message.textContent = 'Пока нет товаров';
+    return;
+  }
+
+  list.forEach(product => {
+    const isFav = favorites.includes(product.id);
+
+    const row = document.createElement('tr');
     row.innerHTML = `
       <td>${product.id}</td>
       <td>${product.title}</td>
       <td>${product.price}</td>
       <td>${product.status}</td>
-      <td>
-        <img src="${product.image}" alt="${product.title}">
-      </td>
+      <td><img src="${product.image}" width="50"></td>
       <td>
         <button onclick="deleteProduct('${product.id}')">Удалить</button>
       </td>
+      <td>
+        <button class="fav-btn" onclick="toggleFavorite('${product.id}')">
+          <i class="fas fa-heart ${isFav ? 'active' : ''}"></i>
+        </button>
+      </td>
+      <td><img src="${img.src}"></td>
     `;
-
     tableBody.appendChild(row);
   });
 }
 
 async function deleteProduct(id) {
-  const confirmDelete = confirm('Вы уверены, что хотите удалить продукт?');
-  if (!confirmDelete) return;
+  if (!confirm('Удалить продукт?')) return;
 
   try {
-    const response = await fetch(`http://localhost:8000/products${API_URL}/${id}`, {
+    const response = await fetch(`${API_URL}/${id}`, {
       method: 'DELETE'
     });
 
-    if (!response.ok) {
-      throw new Error('Ошибка при удалении');
-    }
+    if (!response.ok) throw new Error('Ошибка при удалении');
 
     message.textContent = 'Продукт удалён';
     fetchProducts();
@@ -72,39 +107,37 @@ async function searchProductById() {
   if (!id) return;
 
   try {
-    message.textContent = 'Поиск продукта...';
+    message.textContent = 'Поиск...';
 
-    const response = await fetch(`http://localhost:8000/products${API_URL}/${id}`);
-    if (!response.ok) {
-      throw new Error('Продукт не найден');
-    }
+    const response = await fetch(`${API_URL}/${id}`);
+    if (!response.ok) throw new Error('Продукт не найден');
 
     const product = await response.json();
     renderProducts([product]);
-    message.textContent = 'Продукт найден';
+    message.textContent = '';
   } catch (error) {
     message.textContent = error.message;
   }
 }
 
-
 searchBtn.addEventListener('click', searchProductById);
-
-
-fetchProducts();
-
+toggleFavoritesBtn.addEventListener('click', () => {
+  showFavoritesOnly = !showFavoritesOnly;
+  toggleFavoritesBtn.textContent = showFavoritesOnly
+    ? 'Показать все'
+    : 'Показать избранное';
+  renderProducts(allProducts);
+});
 
 const createForm = document.getElementById('createForm');
 
 createForm.addEventListener('submit', async (e) => {
   e.preventDefault();
 
-
   const title = document.getElementById('title');
   const price = document.getElementById('price');
   const status = document.getElementById('status');
   const image = document.getElementById('image');
-
 
   clearCreateErrors();
   let isValid = true;
@@ -141,15 +174,11 @@ createForm.addEventListener('submit', async (e) => {
   try {
     const response = await fetch(API_URL, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(newProduct)
     });
 
-    if (!response.ok) {
-      throw new Error('Ошибка при создании продукта');
-    }
+    if (!response.ok) throw new Error('Ошибка при создании продукта');
 
     message.textContent = 'Продукт создан';
     createForm.reset();
@@ -166,3 +195,4 @@ function showCreateError(id, text) {
 function clearCreateErrors() {
   document.querySelectorAll('.error').forEach(e => e.textContent = '');
 }
+fetchProducts();
